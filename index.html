@@ -1,1 +1,496 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Prezzario - Litografia</title>
+<link rel="icon" type="image/png" href="favicon.png">
+<style>
+  :root {
+    --text: #5B5B5B;
+    --muted: rgba(91, 91, 91, .66);
+    --primary: #76398B;
+    --primary-soft: rgba(118, 57, 139, .10);
+    --line: rgba(91, 91, 91, .12);
+    --shadow: 0 20px 60px rgba(91, 91, 91, .10);
+    --radius: 28px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Roboto, Arial, sans-serif;
+    color: var(--text);
+    font-weight: 400;
+    background:
+      radial-gradient(1200px 700px at 15% 10%, rgba(118,57,139,.08), transparent 50%),
+      radial-gradient(1000px 600px at 85% 20%, rgba(91,91,91,.05), transparent 50%),
+      #ffffff;
+    min-height: 100vh;
+  }
+  .bg { position: fixed; inset: 0; overflow: hidden; z-index: -1; }
+  .blob { position: absolute; width: 420px; height: 420px; border-radius: 50%; filter: blur(70px); opacity: .16; }
+  .b1 { left: -120px; top: 80px; background: rgba(118,57,139,.35); }
+  .b2 { right: -100px; top: 20px; background: rgba(91,91,91,.18); }
+  .b3 { right: 18%; bottom: -160px; background: rgba(118,57,139,.18); }
+  .glass {
+    background: linear-gradient(135deg, rgba(255,255,255,.88), rgba(255,255,255,.72));
+    backdrop-filter: blur(24px) saturate(140%);
+    -webkit-backdrop-filter: blur(24px) saturate(140%);
+    border: 1px solid rgba(255,255,255,.65);
+    box-shadow: var(--shadow);
+    border-radius: var(--radius);
+  }
+  header.topbar {
+    position: sticky; top: 14px; z-index: 20;
+    display: flex; justify-content: space-between; align-items: center; gap: 16px;
+    padding: 16px 20px; margin: 14px auto 0; max-width: 1340px;
+  }
+  .topbarLeft { display: flex; align-items: center; gap: 14px; }
+  .refreshBtn { width: 44px; height: 44px; padding: 0; font-size: 22px; display: flex; align-items: center; justify-content: center; }
+  .brand { display: flex; align-items: center; gap: 14px; }
+  .logoImg { width: 200px; height: 50px; border-radius: 16px; object-fit: contain; flex: 0 0 auto; }
+  h1 { margin: 0; font-size: 22px; letter-spacing: -.02em; font-weight: 600; }
+  header p { margin: 2px 0 0; color: var(--muted); font-size: 13px; }
+  h2 { margin: 0 0 14px; font-size: 20px; font-weight: 600; }
+  h3 { margin: 0 0 12px; font-size: 16px; font-weight: 600; }
+  main { max-width: 1340px; margin: 18px auto 40px; padding: 0 14px; }
+  .hidden { display: none !important; }
+  .muted { color: var(--muted); }
+  small { font-size: 12px; }
+  .topActions { display: flex; gap: 10px; flex-wrap: wrap; }
+  #normalView { display: grid; gap: 18px; }
+  .preview { padding: 22px; }
+  .grid { display: grid; grid-template-columns: 1.08fr .92fr; gap: 18px; align-items: start; }
+  .card { padding: 20px; }
+  .heroStats { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; margin-bottom: 18px; }
+  .heroStat { padding: 14px 16px; border-radius: 22px; background: rgba(255,255,255,.72); border: 1px solid rgba(91,91,91,.08); }
+  .heroValue { display: block; font-size: 28px; font-weight: 600; }
+  .heroLabel { display: block; margin-top: 4px; color: var(--muted); font-size: 12px; }
+  .sheets { display: flex; gap: 18px; justify-content: center; flex-wrap: wrap; }
+  .sheetFig { margin: 0; min-width: 280px; flex: 1; max-width: 430px; }
+  .sheetWrap { padding: 14px; border-radius: 26px; background: rgba(255,255,255,.72); border: 1px solid rgba(91,91,91,.08); }
+  .sheetFig svg { width: 100%; height: auto; display: block; }
+  .sheetFig figcaption { text-align: center; margin-top: 10px; color: var(--muted); font-size: 13px; }
+  .paper { fill: #f3f3f3; stroke: rgba(91,91,91,.12); }
+  .printable { fill: #fff; stroke: rgba(91,91,91,.12); }
+  .copy { fill: rgba(118,57,139,.10); stroke: rgba(118,57,139,.42); stroke-width: 1.2; }
+  .copy.back { fill: rgba(91,91,91,.08); stroke: rgba(91,91,91,.34); }
+  label { display: block; font-size: 13px; font-weight: 500; color: rgba(91,91,91,.82); }
+  input, select, textarea {
+    width: 100%; margin-top: 6px; padding: 12px 13px; border-radius: 16px;
+    border: 1px solid rgba(91,91,91,.12); background: rgba(255,255,255,.86);
+    outline: none; font: inherit; font-weight: 400; color: var(--text);
+  }
+  input:focus, select:focus, textarea:focus { border-color: rgba(118,57,139,.38); box-shadow: 0 0 0 4px rgba(118,57,139,.08); }
+  .fieldRow { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px; }
+  .fieldRow3 { display: grid; grid-template-columns: 1fr 1fr 180px; gap: 12px; margin-bottom: 12px; align-items: end; }
+  .singleField { margin-bottom: 12px; }
+  .fieldName { margin: 16px 0 8px; font-size: 13px; font-weight: 600; }
+  .unitControl { display: flex; flex-direction: column; gap: 8px; }
+  .unitLabel { font-size: 13px; font-weight: 500; color: rgba(91,91,91,.82); }
+  .unitToggle { display: flex; gap: 6px; padding: 6px; border-radius: 18px; background: rgba(255,255,255,.78); border: 1px solid rgba(91,91,91,.10); }
+  .unitToggle button { flex: 1; border: none; cursor: pointer; font: inherit; font-weight: 500; padding: 10px 12px; border-radius: 13px; background: transparent; color: rgba(91,91,91,.72); transition: .18s background, .18s color; }
+  .unitToggle button.active { background: var(--primary); color: #fff; }
+  .graphicsBarWrap { position: relative; }
+  .graphicsBar { display: flex; gap: 8px; overflow-x: auto; padding: 8px; border-radius: 18px; background: rgba(255,255,255,.78); border: 1px solid rgba(91,91,91,.10); scrollbar-width: none; }
+  .graphicsBar::-webkit-scrollbar { display: none; }
+  .graphicsBtn { flex: 0 0 auto; border: none; cursor: pointer; font: inherit; font-weight: 500; padding: 10px 12px; border-radius: 13px; background: transparent; color: rgba(91,91,91,.72); white-space: nowrap; transition: .18s background, .18s color; }
+  .graphicsBtn:hover { background: rgba(118,57,139,.06); }
+  .graphicsBtn.active { background: var(--primary); color: #fff; }
+  .graphicsSelectMobile { display: none; }
+  .segmented { display: flex; gap: 6px; padding: 6px; border-radius: 18px; background: rgba(255,255,255,.72); border: 1px solid rgba(91,91,91,.10); flex-wrap: wrap; }
+  .btn, .segBtn { border: none; cursor: pointer; font: inherit; font-weight: 500; transition: .18s transform, .18s background, .18s box-shadow; }
+  .segBtn { padding: 10px 12px; border-radius: 13px; background: transparent; color: rgba(91,91,91,.72); }
+  .segBtn.active { background: var(--primary); color: white; box-shadow: 0 8px 20px rgba(118,57,139,.16); }
+  .btn { padding: 11px 14px; border-radius: 16px; background: rgba(255,255,255,.82); border: 1px solid rgba(91,91,91,.12); color: var(--text); }
+  .btn.primary { color: white; background: var(--primary); border: none; box-shadow: 0 14px 30px rgba(118,57,139,.16); }
+  .btn.active { background: var(--primary); color: white; border: none; }
+  .btn:disabled { opacity: .5; pointer-events: none; }
+  .btn:active, .segBtn:active, .graphicsBtn:active, .unitToggle button:active { transform: scale(.985); }
+  .checkGrid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; }
+  .extraItem { display: flex; align-items: center; gap: 8px; }
+  .check { flex: 1; display: flex; align-items: flex-start; gap: 10px; padding: 11px 12px; border-radius: 16px; background: rgba(255,255,255,.78); border: 1px solid rgba(91,91,91,.10); font-size: 14px; font-weight: 500; cursor: pointer; }
+  .check input { width: auto; margin-top: 3px; accent-color: var(--primary); }
+  .check span { display: block; line-height: 1.35; }
+  .miniBadge { border: none; background: var(--primary-soft); color: var(--primary); padding: 7px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .info { position: relative; width: 20px; height: 20px; border-radius: 50%; background: var(--primary-soft); color: var(--primary); display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 600; cursor: help; flex: 0 0 auto; user-select: none; }
+  .info::after { content: attr(data-tip); position: absolute; bottom: 135%; left: 50%; transform: translateX(-50%) translateY(4px); background: #5B5B5B; color: #fff; padding: 9px 11px; border-radius: 12px; font-size: 12px; line-height: 1.35; width: 250px; opacity: 0; pointer-events: none; transition: .18s; z-index: 60; }
+  .info::before { content: ""; position: absolute; bottom: 110%; left: 50%; transform: translateX(-50%); border: 6px solid transparent; border-top-color: #5B5B5B; opacity: 0; transition: .18s; z-index: 60; }
+  .info:hover::after, .info:focus::after, .info:hover::before, .info:focus::before { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .starBadge { color: var(--primary); font-size: 14px; display: inline-flex; align-items: center; margin-left: 2px; }
+  .descGrid { display: grid; grid-template-columns: repeat(2,1fr); gap: 10px; margin-top: 12px; }
+  .descItem { padding: 12px 13px; border-radius: 18px; background: rgba(255,255,255,.80); border: 1px solid rgba(91,91,91,.10); }
+  .descItem.editable { cursor: default; }
+  .descItem.editable:hover { border-color: rgba(118,57,139,.24); }
+  .descItem span { display: block; font-size: 11px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); margin-bottom: 4px; }
+  .descItem strong { font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .priceBox { margin-top: 16px; padding: 18px; border-radius: 24px; background: linear-gradient(135deg, rgba(118,57,139,.08), rgba(91,91,91,.04)); border: 1px solid rgba(91,91,91,.10); }
+  .priceLabel { font-size: 12px; text-transform: uppercase; letter-spacing: .05em; color: var(--muted); font-weight: 600; }
+  .price { font-size: 38px; font-weight: 600; margin-top: 6px; color: var(--primary); display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .priceOriginal { font-size: 22px; color: var(--muted); text-decoration: line-through; font-weight: 400; }
+  .breakdown { margin-top: 14px; display: grid; gap: 8px; }
+  .breakRow { display: flex; justify-content: space-between; gap: 12px; padding: 10px 12px; border-radius: 14px; background: rgba(255,255,255,.78); font-weight: 500; }
+  .breakRow span { display: flex; align-items: center; gap: 6px; flex: 1; }
+  .inlineEditor { display: grid; gap: 8px; margin-top: 8px; }
+  .inlineEditor input, .inlineEditor select { margin-top: 0; padding: 10px 11px; border-radius: 13px; }
+  .inlineActions { display: flex; gap: 8px; flex-wrap: wrap; }
+  .wizard { display: flex; justify-content: center; padding: 10px 0 30px; }
+  .wizardCard { width: min(920px, 100%); padding: 24px; }
+  .wizardHead { display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; margin-bottom: 14px; }
+  .progress { height: 8px; border-radius: 999px; background: rgba(91,91,91,.10); overflow: hidden; margin: 14px 0 22px; }
+  #progressFill { height: 100%; width: 16.6%; border-radius: 999px; background: var(--primary); transition: width .25s ease; }
+  .wStep { min-height: 340px; }
+  .wizardNav { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 22px; }
+  .error { padding: 16px; border-radius: 18px; background: rgba(200,70,60,.08); border: 1px solid rgba(200,70,60,.16); color: #b30000; font-weight: 500; }
+  .modal { position: fixed; inset: 0; z-index: 100; display: flex; align-items: center; justify-content: center; padding: 18px; }
+  .modal-backdrop { position: absolute; inset: 0; background: rgba(91,91,91,.28); backdrop-filter: blur(8px); }
+  .modal-panel { position: relative; width: min(1180px,100%); max-height: 88vh; overflow: auto; padding: 20px; background: linear-gradient(135deg, rgba(255,255,255,.94), rgba(255,255,255,.84)); border-radius: 28px; }
+  .modal-panel.small { width: min(620px,100%); }
+  .modal-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .adminGrid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .adminTable { width: 100%; border-collapse: collapse; margin-top: 10px; }
+  .adminTable th, .adminTable td { padding: 8px; border-bottom: 1px solid rgba(91,91,91,.08); vertical-align: middle; }
+  .adminTable input, .adminTable select { padding: 9px 10px; border-radius: 12px; }
+  .adminNote { margin-top: 10px; color: var(--muted); font-size: 13px; line-height: 1.45; }
+  .adminActions { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 14px; }
+  .toast { position: fixed; left: 50%; bottom: 22px; transform: translateX(-50%) translateY(20px); padding: 12px 16px; border-radius: 16px; background: #5B5B5B; color: white; opacity: 0; pointer-events: none; transition: .25s; z-index: 200; font-weight: 500; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .placeholder-box {
+    padding: 40px; text-align: center; color: var(--muted);
+    border: 2px dashed rgba(118,57,139,.3); border-radius: 20px; margin-top: 20px;
+  }
+  .placeholder-box .icon { font-size: 48px; margin-bottom: 12px; }
+  @media (max-width: 980px) {
+    .grid { grid-template-columns: 1fr; }
+    .heroStats { grid-template-columns: repeat(2,1fr); }
+    .adminGrid { grid-template-columns: 1fr; }
+    .fieldRow3 { grid-template-columns: 1fr; }
+    .checkGrid { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 768px) {
+    .graphicsBar { display: none; }
+    .graphicsSelectMobile { display: block; width: 100%; }
+  }
+  @media print {
+    header.topbar, .topActions, .controls, .modal, .toast, .btn, #wizardView, .info::after, .info::before { display: none !important; }
+    body { background: white; }
+    .glass { box-shadow: none; background: white; backdrop-filter: none; border-color: #ddd; }
+    .preview { padding: 0; }
+  }
+</style>
+</head>
+<body>
+  <div class="bg">
+    <div class="blob b1"></div>
+    <div class="blob b2"></div>
+    <div class="blob b3"></div>
+  </div>
 
+  <header class="glass topbar">
+    <div class="topbarLeft">
+      <button class="btn refreshBtn" onclick="window.location.reload()" title="Ricarica la pagina">⟳</button>
+      <div class="brand">
+        <img src="logo.png" alt="Logo" class="logoImg">
+        <div>
+          <h1>Prezzario</h1>
+          <p>Versione 0.1 - Litografia</p>
+        </div>
+      </div>
+    </div>
+    <div class="topActions">
+      <button id="viewStepBtn" class="btn active" onclick="showWizard()">Step</button>
+      <button id="viewNormalBtn" class="btn" onclick="showNormal()">Configuratore</button>
+      <button class="btn" onclick="printNormal()">PDF</button>
+      <button id="adminBtn" class="btn" onclick="openAdmin()">Admin</button>
+      <button id="logoutBtn" class="btn hidden" onclick="logoutAdmin()">Esci</button>
+    </div>
+  </header>
+
+  <main>
+    <!-- WIZARD -->
+    <section id="wizardView" class="wizard">
+      <div class="glass wizardCard">
+        <div class="wizardHead">
+          <div>
+            <h2>Segui tutti gli Step</h2>
+            <div id="wizardStepLabel" class="muted">Step 1 di 6</div>
+          </div>
+        </div>
+        <div class="progress"><div id="progressFill"></div></div>
+
+        <div id="wStep1" class="wStep">
+          <h3>1 · Dimensione Lavoro</h3>
+          <div class="fieldRow3">
+            <label>Larghezza
+              <input id="wWidth" type="text" inputmode="decimal" value="0">
+            </label>
+            <label>Altezza
+              <input id="wHeight" type="text" inputmode="decimal" value="0">
+            </label>
+            <div class="unitControl">
+              <span class="unitLabel">Unità</span>
+              <div class="unitToggle">
+                <button type="button" data-unit="cm" onclick="setUnit('cm')">cm</button>
+                <button type="button" data-unit="mm" onclick="setUnit('mm')">mm</button>
+              </div>
+            </div>
+          </div>
+          <div id="wStep1Error" class="error hidden"></div>
+        </div>
+
+        <div id="wStep2" class="wStep hidden">
+          <h3>2 · Quantità e Carta</h3>
+          <div class="singleField">
+            <label>Quantità
+              <input id="wQty" type="number" value="0">
+            </label>
+          </div>
+          <div class="fieldRow">
+            <label>Carta
+              <select id="wPaperType"><option>Patinata</option></select>
+            </label>
+            <label>Grammatura
+              <select id="wWeight"><option>350 g</option></select>
+            </label>
+          </div>
+          <div id="wStep2Error" class="error hidden"></div>
+        </div>
+
+        <div id="wStep3" class="wStep hidden">
+          <h3>3 · Tipologia di Stampa</h3>
+          <div class="fieldName">Stampa</div>
+          <div id="wSidesOptions" class="segmented">
+            <button class="segBtn active" data-sides="1" onclick="setSides(1)">Solo fronte</button>
+            <button class="segBtn" data-sides="2" onclick="setSides(2)">Fronte/retro</button>
+          </div>
+          <div style="margin-top:16px">
+            <label class="check">
+              <input type="checkbox" id="wReseller" onchange="setReseller(this.checked)">
+              <span>Rivenditore</span>
+            </label>
+          </div>
+        </div>
+
+        <div id="wStep4" class="wStep hidden">
+          <h3>4 · Lavorazioni extra</h3>
+          <div class="placeholder-box">
+            <div class="icon">🔧</div>
+            <p>In attesa delle specifiche per le lavorazioni extra della litografia.</p>
+          </div>
+        </div>
+
+        <div id="wStep5" class="wStep hidden">
+          <h3>5 · Grafica e opzioni finali</h3>
+          <div class="placeholder-box">
+            <div class="icon">🎨</div>
+            <p>In attesa delle specifiche per la grafica della litografia.</p>
+          </div>
+        </div>
+
+        <div id="wStep6" class="wStep hidden">
+          <h3>6 · Riepilogo</h3>
+          <div id="wizardSummary">
+            <div class="placeholder-box">
+              <div class="icon">📋</div>
+              <p>Il riepilogo sarà disponibile quando le specifiche saranno configurate.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="wizardNav">
+          <button id="wBack" class="btn" onclick="wizardBack()" disabled>Indietro</button>
+          <div style="display:flex;gap:10px">
+            <button id="wNext" class="btn primary" onclick="wizardNext()">Avanti</button>
+            <button id="wFinish" class="btn primary hidden" onclick="finishWizard()">Apri configuratore</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NORMAL VIEW -->
+    <div id="normalView" class="hidden">
+      <section class="glass preview">
+        <div class="placeholder-box">
+          <div class="icon">🖼️</div>
+          <p>Anteprima del foglio sarà disponibile quando le specifiche saranno configurate.</p>
+        </div>
+      </section>
+      <section class="grid">
+        <section class="glass card controls">
+          <h2>Configura prodotto</h2>
+          <div class="fieldRow3">
+            <label>Larghezza
+              <input id="width" type="text" inputmode="decimal" value="0">
+            </label>
+            <label>Altezza
+              <input id="height" type="text" inputmode="decimal" value="0">
+            </label>
+            <div class="unitControl">
+              <span class="unitLabel">Unità</span>
+              <div class="unitToggle">
+                <button type="button" data-unit="cm" onclick="setUnit('cm')">cm</button>
+                <button type="button" data-unit="mm" onclick="setUnit('mm')">mm</button>
+              </div>
+            </div>
+          </div>
+          <div class="singleField">
+            <label>Quantità
+              <input id="qty" type="number" value="0">
+            </label>
+          </div>
+          <div class="fieldRow">
+            <label>Carta
+              <select id="paperType"><option>Patinata</option></select>
+            </label>
+            <label>Grammatura
+              <select id="weight"><option>350 g</option></select>
+            </label>
+          </div>
+          <div class="fieldName">Stampa</div>
+          <div id="sidesOptions" class="segmented">
+            <button class="segBtn active" data-sides="1" onclick="setSides(1)">Solo fronte</button>
+            <button class="segBtn" data-sides="2" onclick="setSides(2)">Fronte/retro</button>
+          </div>
+          <div class="placeholder-box" style="margin-top:16px">
+            <div class="icon">⚙️</div>
+            <p>Configurazioni aggiuntive in attesa di specifiche.</p>
+          </div>
+        </section>
+        <section class="glass card summary">
+          <h2>Riepilogo e prezzo</h2>
+          <div class="placeholder-box">
+            <div class="icon">💰</div>
+            <p>Il calcolo del prezzo sarà disponibile quando le specifiche saranno configurate.</p>
+          </div>
+        </section>
+      </section>
+    </div>
+  </main>
+
+  <!-- ADMIN -->
+  <div id="adminModal" class="modal hidden">
+    <div class="modal-backdrop" onclick="closeAdmin()"></div>
+    <div class="modal-panel glass">
+      <div class="modal-head">
+        <h2>Pannello privato - Litografia</h2>
+        <button class="btn" onclick="closeAdmin()">Chiudi</button>
+      </div>
+      <div class="placeholder-box">
+        <div class="icon">🔐</div>
+        <p>Il pannello admin sarà configurato quando le specifiche della litografia saranno pronte.</p>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+
+<script>
+const state = {
+  uiMode: 'wizard',
+  wizardStep: 1,
+  unit: 'cm',
+  widthMm: 0,
+  heightMm: 0,
+  qty: 0,
+  sides: 1,
+  reseller: false,
+  admin: false
+};
+
+function setUnit(unit) {
+  state.unit = unit;
+  $$('.unitToggle button').forEach(b => {
+    b.classList.toggle('active', b.dataset.unit === unit);
+  });
+}
+
+function setSides(n) {
+  state.sides = n;
+  $$('#sidesOptions button, #wSidesOptions button').forEach(b => {
+    b.classList.toggle('active', Number(b.dataset.sides) === n);
+  });
+}
+
+function setReseller(checked) {
+  state.reseller = checked;
+}
+
+function showWizard() {
+  state.uiMode = 'wizard';
+  $('#normalView').classList.add('hidden');
+  $('#wizardView').classList.remove('hidden');
+  $('#viewStepBtn').classList.add('active');
+  $('#viewNormalBtn').classList.remove('active');
+}
+
+function showNormal() {
+  state.uiMode = 'normal';
+  $('#wizardView').classList.add('hidden');
+  $('#normalView').classList.remove('hidden');
+  $('#viewStepBtn').classList.remove('active');
+  $('#viewNormalBtn').classList.add('active');
+}
+
+function printNormal() {
+  if (state.uiMode !== 'normal') showNormal();
+  setTimeout(() => window.print(), 80);
+}
+
+function wizardBack() {
+  if (state.wizardStep > 1) {
+    state.wizardStep--;
+    updateWizard();
+  }
+}
+
+function wizardNext() {
+  if (state.wizardStep < 6) {
+    state.wizardStep++;
+    updateWizard();
+  }
+}
+
+function finishWizard() {
+  showNormal();
+}
+
+function updateWizard() {
+  $('#wizardStepLabel').textContent = 'Step ' + state.wizardStep + ' di 6';
+  $('#progressFill').style.width = ((state.wizardStep / 6) * 100) + '%';
+  for (let i = 1; i <= 6; i++) {
+    $('#wStep' + i).classList.toggle('hidden', state.wizardStep !== i);
+  }
+  $('#wBack').disabled = state.wizardStep === 1;
+  $('#wNext').classList.toggle('hidden', state.wizardStep === 6);
+  $('#wFinish').classList.toggle('hidden', state.wizardStep !== 6);
+}
+
+function openAdmin() {
+  const pin = prompt('PIN amministratore:');
+  if (pin === '1234') {
+    state.admin = true;
+    $('#adminModal').classList.remove('hidden');
+    $('#adminBtn').textContent = 'Pannello';
+    $('#logoutBtn').classList.remove('hidden');
+  } else if (pin !== null) {
+    alert('PIN errato');
+  }
+}
+
+function closeAdmin() {
+  $('#adminModal').classList.add('hidden');
+}
+
+function logoutAdmin() {
+  state.admin = false;
+  closeAdmin();
+  $('#adminBtn').textContent = 'Admin';
+  $('#logoutBtn').classList.add('hidden');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeAdmin();
+});
+</script>
+</body>
+</html>
